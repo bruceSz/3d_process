@@ -7,9 +7,10 @@ import time
 import os
 import struct
 
-import octree as octree
-import kdtree as kdtree
-from result_set import KNNResultSet, RadiusNNResultSet
+
+from result_set import KNNResultSet
+
+
 
 def read_velodyne_bin(path):
     '''
@@ -35,9 +36,6 @@ def main():
     k = 8
     radius = 1
 
-    root_dir = '/Users/renqian/cloud_lesson/kitti' # 数据集路径
-    cat = os.listdir(root_dir)
-    iteration_num = len(cat)
 
     print("octree --------------")
     construction_time_sum = 0

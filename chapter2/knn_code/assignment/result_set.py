@@ -75,6 +75,19 @@ class RadiusNNResultSet:
     def worstDist(self):
         return self.radius
 
+    def top(self, n: int):
+        import numpy as np
+        tmpL = []
+        for di in self.dist_index_list:
+            tmpL.append([di.distance, di.index])
+
+    
+        arr = np.array(tmpL)
+        idx = np.argsort(arr[:,0])
+        res = arr[idx]
+        return res[:n,1]
+
+
     def add_point(self, dist, index):
         self.comparison_counter += 1
         if dist > self.radius:
