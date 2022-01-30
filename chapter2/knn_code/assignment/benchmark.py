@@ -10,6 +10,7 @@ import struct
 import octree as octree
 import kdtree as kdtree
 from result_set import KNNResultSet, RadiusNNResultSet
+from scipy import spatial
 
 def read_velodyne_bin(path):
     '''
@@ -35,7 +36,8 @@ def main():
     k = 8
     radius = 1
 
-    root_dir = '/Users/renqian/cloud_lesson/kitti' # 数据集路径
+    #root_dir = '/Users/renqian/cloud_lesson/kitti' # 数据集路径
+    root_dir = "./da"
     cat = os.listdir(root_dir)
     iteration_num = len(cat)
 
@@ -47,6 +49,8 @@ def main():
     for i in range(iteration_num):
         filename = os.path.join(root_dir, cat[i])
         db_np = read_velodyne_bin(filename)
+        print("shape of db: ",db_np.shape)
+        db_np = db_np.T
 
         begin_t = time.time()
         root = octree.octree_construction(db_np, leaf_size, min_extent)
@@ -64,6 +68,8 @@ def main():
         octree.octree_radius_search_fast(root, db_np, result_set, query)
         radius_time_sum += time.time() - begin_t
 
+        
+
         begin_t = time.time()
         diff = np.linalg.norm(np.expand_dims(query, 0) - db_np, axis=1)
         nn_idx = np.argsort(diff)
@@ -79,6 +85,7 @@ def main():
     knn_time_sum = 0
     radius_time_sum = 0
     brute_time_sum = 0
+    scipy_time_sum = 0
     for i in range(iteration_num):
         filename = os.path.join(root_dir, cat[i])
         db_np = read_velodyne_bin(filename)
@@ -86,6 +93,9 @@ def main():
         begin_t = time.time()
         root = kdtree.kdtree_construction(db_np, leaf_size)
         construction_time_sum += time.time() - begin_t
+
+
+        scipy_tree = spatial.KDTree(db_np)
 
         query = db_np[0,:]
 
@@ -104,10 +114,15 @@ def main():
         nn_idx = np.argsort(diff)
         nn_dist = diff[nn_idx]
         brute_time_sum += time.time() - begin_t
-    print("Kdtree: build %.3f, knn %.3f, radius %.3f, brute %.3f" % (construction_time_sum * 1000 / iteration_num,
+
+        begin_t = time.time()
+        scipy_tree.query(query, k=k)
+        scipy_time_sum += time.time() - begin_t
+    print("Kdtree: build %.3f, knn %.3f, radius %.3f, brute %.3f, scipy %.3f" % (construction_time_sum * 1000 / iteration_num,
                                                                      knn_time_sum * 1000 / iteration_num,
                                                                      radius_time_sum * 1000 / iteration_num,
-                                                                     brute_time_sum * 1000 / iteration_num))
+                                                                     brute_time_sum * 1000 / iteration_num,
+                                                                     scipy_time_sum * 1000/ iteration_num))
 
 
 

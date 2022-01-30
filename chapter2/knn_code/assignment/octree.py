@@ -361,9 +361,10 @@ def main():
     leaf_size = 4
     min_extent = 0.0001
     k = 8
-
+    
     db_np = np.random.rand(db_size, dim)
     print(db_np[0])
+    print("shape of db: ",db_np.shape)
 
     root = octree_construction(db_np, leaf_size, min_extent)
 
