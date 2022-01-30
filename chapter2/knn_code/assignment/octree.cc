@@ -11,6 +11,8 @@ using namespace std;
 using namespace Eigen;
 
 using DataM =  Matrix<double, Dynamic, 3>;
+
+using DataMT = Matrix<double, 3, Dynamic>;
 struct Point {
         float x;
         float y;
@@ -51,9 +53,9 @@ struct  RadiusNNResultSet {
 
          });
          vector<int> res;
-         transform(tmpL.cbegin(), tmpL.cend(), std::back_inserter(res) ,[](const std::pair<float, index>p ) {
+         transform(tmpL.cbegin(), tmpL.cend(), std::back_inserter(res) ,[](const std::pair<float, int>p ) {
              return p.second;
-         })
+         });
          return res;
     }
 
@@ -96,6 +98,21 @@ class Octant {
 };
 
 
+int compute_morton(const Vector3d& query, const Vector3d& center) {
+    int morton_code = 0;
+    if(query(0) > center[0]) {
+        morton_code |= 1;
+    }
+    if (query(1) > center[1]) {
+        morton_code |= 2;
+    }
+
+    if (query(2) > center[2]) {
+        morton_code |= 4;
+    }
+    return morton_code;
+}
+
 //# 功能：通过递归的方式构建octree
 //# 输入：
 //#     root：根节点
@@ -125,17 +142,8 @@ shared_ptr<Octant>  octree_recursive_build(shared_ptr<Octant> root,
         vector<vector<int>> children_point_indices(8, vector<int>());
         for(auto idx: point_indices) {
             //auto pt = db[idx];
-            int mortan_code = 0;
-            if(db(idx,0) > center[0]) {
-                mortan_code |= 1;
-            }
-            if (db(idx,1) > center[1]) {
-                mortan_code |= 2;
-            }
-
-            if (db(idx,2) > center[2]) {
-                mortan_code |= 4;
-            }
+            int mortan_code = compute_morton(db(idx,all), center);
+            
             children_point_indices[mortan_code].push_back(idx);
         }
         float factor[] = {-0.5, 0.5};
@@ -183,8 +191,33 @@ shared_ptr<Octant> octree_construction(DataM & db, int leaf_size, float min_exte
    // db_min_x = 
 }
 
+bool inside(const Vector3d& query, float dist, shared_ptr<Octant> & root) {
+    return false;
+
+}
 
 
+bool contains(const Vector3d& query, float dist, shared_ptr<Octant> root) {
+     return false;
+}
+
+void updateResultSet(const DataM& db, vector<int> indices, shared_ptr<RadiusNNResultSet> result_set
+ , const Vector3d &query) {
+    DataMT leaf_points = db(indices,all).transpose();
+    // N * 3
+    auto diff_arr = leaf_points.transpose() - query;
+    auto diff = diff_arr.rowwise().norm();
+    for(int i=0;i<diff.rows();i++) {
+        float d_ = diff(i);
+        int idx_ = indices[i];
+        result_set->add_points(d_, idx_);
+    }
+}
+
+
+bool overlap(const Vector3d& query, float dist, shared_ptr<Octant> root) {
+    return false;
+}
 
 //# 功能：在octree中查找信息
 //# 输入：
@@ -193,61 +226,52 @@ shared_ptr<Octant> octree_construction(DataM & db, int leaf_size, float min_exte
 //#    result_set: 索引结果
 //#    query：索引信息
 
-bool octree_radius_search_fast(shared_ptr<Octant> root , DataM&  db, 
-      shared_ptr<RadiusNNResultSet> result_set, Vector3d& query) {
+bool octree_radius_search_fast(shared_ptr<Octant> root , const DataM&  db, 
+      shared_ptr<RadiusNNResultSet> result_set, const Vector3d& query) {
         if (!root) {
             return false;
         }
         if (root->is_leaf_  && root->point_indices_.size() > 0) {
             auto leaf_points = db(root->point_indices_,all);
-            
+            // N * 3
+            auto diff_arr = leaf_points - query;
+            auto diff = diff_arr.colwise().norm();
+            for(int i=0;i<diff.rows();i++) {
+                float d_ = diff(i);
+                int idx_ = root->point_indices_[i];
+                result_set->add_points(d_, idx_);
+            }
+            return inside(query, result_set->worstDist(), root);
         }
 
+        if (contains(query, result_set->worstDist(), root) && root->point_indices_.size() > 0) {
+            updateResultSet(db, root->point_indices_, result_set, query);
+            return false;
+        }
+
+        int morton_code = compute_morton(query, root->center_);
+
+        if (octree_radius_search_fast(root->children_[morton_code], db, result_set, query)) {
+            return true;
+        }
+
+        for(auto idx=0;idx<root->children_.size();idx++) {
+            if (idx == morton_code || !root->children_[idx]) {
+                continue;
+            }
+
+            if (!overlap(query, result_set->worstDist(),root->children_[idx])) {
+                continue;
+            }
+            if (octree_radius_search_fast(root->children_[idx], db, result_set, query)) {
+                return true;
+            }
+        }
+
+        return inside(query, result_set->worstDist(), root);
 
 }
     
-    
-    if  root.is_leaf  and len(root.point_indices) > 0:
-        # compare the contents of a leaf
-        leaf_points = db[root.point_indices, :]
-        diff = np.linalg.norm(np.expand_dims(query, 0) - leaf_points, axis=1)
-        for i in range(diff.shape[0]):
-            result_set.add_point(diff[i], root.point_indices[i])
-        # check whether we can stop search now
-        return inside(query, result_set.worstDist(), root)
-    
-    # current radius ball contains the octant
-    if contains(query, result_set.worstDist(), root) and len(root.point_indices) > 0:
-        leaf_points = db[root.point_indices, :]
-        diff = np.linalg.norm(np.expand_dims(query, 0) - leaf_points, axis=1)
-        for i in range(diff.shape[0]):
-            result_set.add_point(diff[i], root.point_indices[i])
-        return False
-
-    # search sub octants.
-    morton_code = 0
-    if query[0] > root.center[0]:
-        morton_code = morton_code | 1
-    if query[1] > root.center[1]:
-        morton_code = morton_code | 2
-    if query[2] > root.center[2]:
-        morton_code = morton_code | 4
-    # current octant is first priority
-    if octree_radius_search_fast(root.children[morton_code], db, result_set, query):
-        return True
-    for c, child in enumerate(root.children):
-        if c == morton_code or child is None:
-            continue
-        if not overlaps(query, result_set.worstDist(), child):
-            continue
-        
-        if octree_radius_search_fast(child,db, result_set, query):
-            return True
-
-    # final check
-    return inside(query, result_set.worstDist(), root)
-    # 屏蔽结束
-
 
 int main(int argc, char** argv) {
     cout << "octree speed test: " << std::endl;
