@@ -12,8 +12,8 @@ class K_Means(object):
         self.max_iter_ = max_iter
 
     def compute_dist(self, p, centers):
-        print("shape of p: ",p.shape)
-        print("shape of center: ", centers.shape)
+        #print("shape of p: ",p.shape)
+        #print("shape of center: ", centers.shape)
         dists = [np.linalg.norm(p - centers[i]) for i in range(len(centers))]
         cls = dists.index(min(dists))
         return cls, min(dists)

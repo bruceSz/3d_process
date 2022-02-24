@@ -5,6 +5,12 @@ from numpy import *
 import pylab
 import random,math
 
+import numpy as np
+
+
+from common import gen_dataset
+from common import color_array
+from common import get_default_para
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 from scipy.stats import multivariate_normal
@@ -12,7 +18,7 @@ from scipy.stats import multivariate_normal
 plt.style.use('seaborn')
 
 class GMM(object):
-    def __init__(self, n_clusters, max_iter=50):
+    def __init__(self, n_clusters, max_iter=100):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         #self.dim = dim
@@ -20,21 +26,7 @@ class GMM(object):
         
     
     # 屏蔽开始
-    # 更新W
-    
-
-    # 更新pi
- 
-        
-    # 更新Mu
-
-
-    # 更新Var
-
-
-    # 屏蔽结束
-
-
+   
     def init_para(self, data):
         n = data.shape[0]
         dim = data.shape[1]
@@ -62,8 +54,9 @@ class GMM(object):
 
         # 
         for i in range(self.max_iter):
-            print("{}th iter: cov: {} det of dev{}".format(i,self.var, np.linalg.det(self.var)))
+            #print("{}th iter: cov: {} det of dev{}".format(i,self.var, np.linalg.det(self.var)))
             #1. e-step
+            # 更新W
             # compute posterior
             for i in range(n):
                 # for each cluster
@@ -74,18 +67,21 @@ class GMM(object):
                 # update w
                 self.W[i,:] = self.W[i,:]/ sum(self.W[i,:])
                     
+            # 更新pi
             # update pi.
             self.pi = self.W.sum(axis=0)/self.W.sum()
 
                 
 
             #2. m-step
+            # 更新Mu
             # 2.1 update mu
             for i in range(self.n_clusters):
                 #each ith cluster
                 for j in range(dim):
                     self.mu[i][j] = np.average( data[:,j] , weights= self.W[:,i])
 
+            # 更新Var
             # 2.2 update var
             for i in range(self.n_clusters):
                 for j in range(dim):
@@ -117,7 +113,7 @@ class GMM(object):
         pred = np.argmax(res,axis=1)#[ np.argmax(res[i,:]) for i in range(n)]
         return pred
         # 屏蔽结束
-
+# 屏蔽结束
 
 def plot_x(X1, X2, X3):
     # 显示数据
@@ -184,6 +180,33 @@ def main():
     # 初始化
 
 
+def test_with_datasets():
+    da = gen_dataset()
+    plot_num = 1
+    default_base = get_default_para()
+    for i, (data, algo_para) in enumerate(da):
+        params = default_base.copy()
+        params.update(algo_para)
+        
+        X, label = data
+        print("shape of data {}".format(X.shape))
+
+        gmm = GMM(n_clusters=params["n_clusters"])
+        gmm.fit(X)
+        pred = gmm.predict(X)
+        print(np.unique(pred))
+        c_set = color_array()
+        colors = []
+        for i in pred:
+            colors.append(c_set[i])
+        plt.subplot(len(da), 1, plot_num)
+        plt.scatter(X[:,0],X[:,1],c=colors)
+        #plt.show()
+
+        plot_num += 1
+
+    plt.show()
+
 def gaussian(x, mean, cov):
     dim = np.shape(cov)[0]
     print(dim)
@@ -203,7 +226,7 @@ def print_gaussian():
     print("scipy normal result: ",multivariate_normal.pdf(x,mu,var))
 
 if __name__ == '__main__':
-    main()
+    test_with_datasets()
 
 
 

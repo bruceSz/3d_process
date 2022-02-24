@@ -180,6 +180,8 @@ def circle_test():
     for i in pred:
         colors.append(col_set[i])
     #    print(i)
+
+    
     plt.scatter(x1, x2, c= colors)
     plt.show()
 

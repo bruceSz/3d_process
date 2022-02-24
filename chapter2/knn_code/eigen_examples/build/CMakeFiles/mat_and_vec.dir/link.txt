@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -O3 -DNDEBUG  -rdynamic CMakeFiles/mat_and_vec.dir/mat_and_vec.cc.o  -o mat_and_vec 

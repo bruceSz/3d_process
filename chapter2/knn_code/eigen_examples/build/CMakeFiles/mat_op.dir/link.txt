@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -O3 -DNDEBUG  -rdynamic CMakeFiles/mat_op.dir/mat_op.cc.o  -o mat_op 

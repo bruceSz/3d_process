@@ -42,6 +42,8 @@ def main():
     knn_time_sum = 0
     radius_time_sum = 0
     brute_time_sum = 0
+    iteration_num = 10
+    root_dir="./da"
     for i in range(iteration_num):
         filename = os.path.join(root_dir, cat[i])
         db_np = read_velodyne_bin(filename)
