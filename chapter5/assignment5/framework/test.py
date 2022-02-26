@@ -22,7 +22,8 @@ if __name__ == "__main__":
   torch.manual_seed(SEED)
   device = torch.device(f'cuda:{gpus[0]}' if torch.cuda.is_available() else 'cpu')
   print("Loading test dataset...")
-  test_data = PointNetDataset("./dataset/modelnet40_normal_resampled", train=1)
+  da_root = os.path.join(os.getcwd(),"../../../","./dataset/modelnet40_normal_resampled")
+  test_data = PointNetDataset(da_root, train=1)
   test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
   model = PointNet().to(device=device)
   if ckp_path:
@@ -40,16 +41,16 @@ if __name__ == "__main__":
       y = y.to(device)
 
       # TODO: put x into network and get out
-      out =
+      out = model(x)
 
       # TODO: get pred_y from out
-      pred_y = 
+      pred_y = np.argmax(out.cpu().detach().numpy(), axis=1)
 
       gt = np.argmax(y.cpu().numpy(), axis=1)
       print("pred[" + str(pred_y)+"] gt[" + str(gt) + "]")
 
       # TODO: calculate acc from pred_y and gt
-      acc = 
+      acc = np.sum(pred_y == gt) / len(y)
       gt_ys = np.append(gt_ys, gt)
       pred_ys = np.append(pred_ys, pred_y)
 

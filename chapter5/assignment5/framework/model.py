@@ -29,18 +29,22 @@ class PointNet(nn.Module):
     # TODO: use functions in __init__ to build network\
     # shape like: torch.Size([2, 3, 10000])
     batch_size = x.size()[0]
+    #print("model input shape: {}".format(x.size()))
     x = self.relu(self.bn1(self.conv1(x)))
     x = self.relu(self.bn2(self.conv2(x)))
     x = self.relu(self.bn3(self.conv3(x)))
     # max return a tuple:  value and idx.
+    #print("res after 3layer dimension raising : {}".format(x.size()))
     x = torch.max(x, 2, keepdim=True)[0]
     x = x.view(-1, 1024)
 
     x = self.relu(self.bn4(self.fc1(x)))
     x = self.relu(self.bn5(self.dropout(self.fc2(x))))
     x = self.fc3(x)
+    #print("final shape: {}".format(x.size()))
 
     x = F.log_softmax(x, dim=1)
+    #print("soft max shape: {}".format(x.size()))
     
     return x
 

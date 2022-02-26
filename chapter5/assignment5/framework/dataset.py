@@ -48,8 +48,21 @@ class PointNetDataset(Dataset):
     feature, label = self._features[idx], self._labels[idx]
     
     # TODO: normalize feature
+    #print("feature input shape: {}".format(feature.shape))
+    feature = feature - np.expand_dims(np.mean(feature, axis=0),0)
+    #print("feature minus mean shape: {}".format(feature.shape))
+    r = np.sqrt(np.sum(feature **2, axis=1))
+    dist = np.max(r,0)
+    #print("sigma shape: {}".format(dist))
+    feature = feature/ dist
     
     # TODO: rotation to feature
+    theta = np.random.uniform(0, np.pi*2)
+    rm = np.array([
+      [np.cos(theta), -np.sin(theta)],
+      [np.sin(theta), np.cos(theta)]
+    ])
+    feature[:,[0,2]] = feature[:,[0,2]].dot(rm)
 
     # jitter
     feature += np.random.normal(0, 0.02, size=feature.shape)
@@ -74,6 +87,10 @@ class PointNetDataset(Dataset):
       if f == "modelnet40_shape_names.txt":
         self._classes = read_file_names_from_file(root_dir + '/' + f)
     tmp_classes = []
+
+    # debug purpose
+    #import random
+    #files = random.choices(files, k=100) 
     with tqdm(total = len(files)) as qbar:
       for file in files:
         num = file.split("_")[-1]
@@ -103,16 +120,18 @@ def example_read_pcd():
 def example_dataset():
   print("shape of curr: ", os.getcwd())
   train_data = PointNetDataset(os.path.join(os.getcwd(),"../../../","./dataset/modelnet40_normal_resampled"), train=0)
+  print("train data shape.")
   train_loader = DataLoader(train_data, batch_size=2, shuffle=True)
   cnt = 0
   print("DataLoader build done.")
   for pts, label in train_loader:
-    print(pts.shape)
-    print(label.shape)
+    #print(pts.shape)
+    print(label)
     cnt += 1
-    if cnt > 3:
-      break    
+    #if cnt > 3:
+    #  break    
 
 
 if __name__ == "__main__":
-  example_read_pcd()
+  #example_read_pcd()
+  example_dataset()
