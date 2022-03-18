@@ -150,7 +150,7 @@ if __name__ == "__main__":
     print("shape of final df: ",len(df_data))
     pcd.paint_uniform_color([0.95,0.95,0.95])
 
-    np.asarray(pcd.colors)[df_data["id"].values,:] = [1.0,0.0,0.0]
+    np.asarray(pcd.colors)[df_data["id"].values,:] = [2.0,0.0,0.0]
 
     
     o3d.visualization.draw_geometries([pcd])

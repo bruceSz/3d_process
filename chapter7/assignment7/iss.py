@@ -57,7 +57,7 @@ def det_kps(pcd):
             if not i in neighbor_num_map:
                 [k_, _, _] = search_tree.search_radius_vector_3d(pts[i], Radius)
                 neighbor_num_map[i] = k_
-            
+
             w.append(neighbor_num_map[i])
         #print("shape of pcd points:", idx.shape)
         neighbors = pts[idx]
@@ -86,7 +86,7 @@ def det_kps(pcd):
             for _i in n_:
                 nms.add(_i)
 
-    
+
     res_df = pd.DataFrame(res, columns=["idx","l1", "l2", "l3","n_neighbors"])
 
     print("shape of res_df: ",len(res_df))
@@ -104,9 +104,9 @@ def det_kps(pcd):
 
 
 def main():
-    test_data = "../../dataset/modelnet40_normal_resampled/lamp/lamp_0001.txt"
+    test_data = "../../dataset/modelnet40_normal_resampled/bottle/bottle_0001.txt"
     pcd = load_pcd(test_data)
-    
+
     pcd, kps = det_kps(pcd)
 
     visualize_pcd_with_kp(pcd, kps)
