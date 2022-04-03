@@ -61,7 +61,7 @@ def format_output( idx1, idx2, T):
     res.append(idx2)
     
     (t, q) = format_transform_matrix(T)
-
+    print("q is: ", q)
     # translation:
     res.append(t[0])
     res.append(t[1])
@@ -123,9 +123,10 @@ def main():
         # init with ransac
         T = get_ransac_guess(s_kps_pc, t_kps_pc, s_ds, t_ds)
         fit_result, new_T = exact_match(s_pc, t_pc, t_pc_kd, T)
-
+        print("source idx:", s_pc_idx, " target idx: ", t_pc_idx,"fit res: ", fit_result.fitness, " with T: ", new_T)
         df.append(format_output(s_pc_idx, t_pc_idx, new_T))
 
+        
         # solve with icp main loop
         #final_trans = icp_loop(s_pc, t_pc, init_trans)
 

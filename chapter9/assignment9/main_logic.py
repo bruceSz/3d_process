@@ -109,6 +109,7 @@ def is_valid_near(pcd_s, pcd_t, s_idx, t_idx, thresh):
 
 def shall_terminate(curr, prev):
     gain = curr.fitness/prev.fitness -1
+    print("gain",gain)
     return gain < 0.005
 
 max_distance= 5
@@ -158,13 +159,15 @@ def exact_match(pcd_s, pcd_t, st_t, T ):
             print("icp iter: ", icp_iter , "fitness" , curr.fitness)
             if shall_terminate(curr, prev):
                 print("got best ", prev.fitness, " curr fitness:", curr.fitness)
+                best_T= T
+                prev = curr
                 break
             if curr.fitness > prev.fitness:
                 print("update result with new fitness", curr.fitness)
                 prev = curr
                 best_T = T
 
-    return curr,best_T
+    return prev,best_T
 
 def get_ransac_guess(s_kps_pc, t_kps_pc, s_ds, t_ds):
     matches = match_between_ds(s_ds, t_ds)
