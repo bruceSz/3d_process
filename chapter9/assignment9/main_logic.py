@@ -132,6 +132,7 @@ def exact_match(pcd_s, pcd_t, st_t, T ):
         pcd_s, pcd_t, max_distance, T
     )
 
+    best_T = T
     for icp_iter in range(max_iter):
         pcd_s_curr = copy.deepcopy(pcd_s)
         pcd_s_curr = pcd_s_curr.transform(T)
@@ -161,8 +162,9 @@ def exact_match(pcd_s, pcd_t, st_t, T ):
             if curr.fitness > prev.fitness:
                 print("update result with new fitness", curr.fitness)
                 prev = curr
+                best_T = T
 
-    return curr,T
+    return curr,best_T
 
 def get_ransac_guess(s_kps_pc, t_kps_pc, s_ds, t_ds):
     matches = match_between_ds(s_ds, t_ds)
