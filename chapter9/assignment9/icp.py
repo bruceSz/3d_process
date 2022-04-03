@@ -132,7 +132,7 @@ def main():
 
         # add to output as reg_result.txt
         #main_logic.dump_res(final_trans)
-        break
+        
     df = pd.DataFrame(df, columns=columns)
     df["idx1"] = df["idx1"].astype(int)
     df["idx2"] = df["idx2"].astype(int)
