@@ -90,10 +90,15 @@ def det_kps(pcd):
     res_df = pd.DataFrame(res, columns=["idx","l1", "l2", "l3","n_neighbors"])
 
     print("shape of res_df: ",len(res_df))
-
+    
     df  = res_df.loc[res_df["idx"].apply(lambda id: not id in nms), res_df.columns]
+    
+    # found some l1 is complex number.
+    df["l1"] = df["l1"].astype(float)
+
     print("shape of df after nms: ",len(df))
-    print("min shape of df with l1: ", min(df["l1"]))
+    print("min  of df  l1: ", min(df["l1"]))
+    print("max  of df  l1: ", max(df["l1"]))
     df = df.loc[(df["l1"]>df["l2"]*Gamma1) & (df["l2"]>df["l3"]*Gamma2) & (df["l3"]>MinEigen), df.columns]
     print("shape of final df: ",len(df))
     return pcd, df

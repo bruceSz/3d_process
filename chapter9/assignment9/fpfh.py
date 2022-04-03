@@ -28,7 +28,7 @@ def compute_spfh(pcd, st, pt, radius, B):
 
     # (p2-p1)/norm(p2-p1)
     dis = pts[idx_n] - pt
-    print("dtype is: ",dis.dtype)
+    #print("dtype is: ",dis.dtype)
     dis = dis/np.reshape(np.linalg.norm(dis, ord=2, axis=1), (k-1, 1))
 
     u = n1
@@ -58,11 +58,11 @@ def compute_spfh(pcd, st, pt, radius, B):
 def compute_fpfh(pcd, st, kp1, radius, B):
     pts = np.asarray(pcd.points)
     k, idx_n, _ = st.search_radius_vector_3d(kp1, radius)
-    print("k is: ",k)
+    #print("k is: ",k)
     idx_n = idx_n[1:]
-    print("shape of idxn: ",np.asarray(idx_n).shape)
+    #print("shape of idxn: ",np.asarray(idx_n).shape)
     w = 1/np.linalg.norm(kp1 - pts[idx_n], ord=2, axis=1)
-    print("shape of w: ",w.shape)
+    #print("shape of w: ",w.shape)
     neighbor_spfh = []
     for i in idx_n:
         spfh = compute_spfh(pcd, st, pts[i], radius, B)
@@ -73,7 +73,8 @@ def compute_fpfh(pcd, st, kp1, radius, B):
 
     fpfh = self_spfh + 1.0/(k-1) * np.dot(w, n_spfh)
     #n_spfh = np.reshape()
-    return fpfh
+    #print("shape of fpfp: ",fpfh.shape)
+    return fpfh.flatten()
 
 
 def main():
