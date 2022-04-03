@@ -102,7 +102,7 @@ def evaluate_rt(gt_file_path, predict_file_path):
 
             # for debug
             print(predict_row)
-
+    print("ready to compute rte.")
     reg_success_rate = counter_successful/len(gt_reg)
     avg_rte = rte_sum/counter_successful
     avg_rre = rre_sum/counter_successful
@@ -120,15 +120,15 @@ def main():
     #dataset_path = '/ssd/jiaxin/PointCloudModule/registration_dataset'
     dataset_path = "../../dataset/registration_dataset"
     ground_truth_reg_result_path = os.path.join(dataset_path, 'groundtruths.txt')
-    your_reg_result_path = os.path.join(dataset_path, 'reg_result.txt')
+    your_reg_result_path = os.path.join(dataset_path, 'reg_result_0403.txt')
 
     # evaluate registration performance
     if os.path.exists(ground_truth_reg_result_path):
         evaluate_rt(ground_truth_reg_result_path, your_reg_result_path)
 
     # visualize registration result
-    visualize_row_idx = 2
-    reg_list = read_reg_results(os.path.join(dataset_path, 'reg_result.txt'), splitter=',')
+    visualize_row_idx = 1
+    reg_list = read_reg_results(os.path.join(dataset_path, 'reg_result_0403.txt'), splitter=',')
     idx1, idx2, t, rot = reg_result_row_to_array(reg_list[visualize_row_idx])
 
     src_np = read_oxford_bin(os.path.join(dataset_path, 'point_clouds', '%d.bin' % idx1))[0:3, :]
